@@ -2,7 +2,7 @@
 
 **The session protocol, quality commands and skills I actually use with [Claude Code](https://claude.com/claude-code) on long-running projects.**
 
-I build and maintain several projects (a multi-tenant school management SaaS, a mobile language-learning app, an e-commerce site, a YouTube documentary pipeline) mostly through AI-assisted development. The files here are copied from those projects and genericized: project paths became placeholders, private details were removed. Command and skill bodies are in **Turkish**, the language I work in; this README and the `project-continuity` / `browser-verified-review` skills are in English.
+I build and maintain several projects (a multi-tenant school management SaaS, a mobile language-learning app, an e-commerce site, a YouTube documentary pipeline) with Claude Code as my day-to-day development tool; architecture, data and security decisions stay with me. The files here are copied from those projects and genericized: project paths became placeholders, private details were removed. Command and skill bodies are in **Turkish**, the language I work in; this README and the `project-continuity` / `browser-verified-review` skills are in English.
 
 ## The problem
 
