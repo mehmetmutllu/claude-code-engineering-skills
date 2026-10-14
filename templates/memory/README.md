@@ -7,7 +7,7 @@ Hızla değişen "şu an ne yapıyoruz" bilgisi buraya **girmez** — o `activeC
 
 | Dosya | İçerik | Ne zaman oku |
 |-------|--------|--------------|
-| [kararlar_urun.md](kararlar_urun.md) | Ürün kararları (K1, K2 …) | Ürün/akış kararı alırken |
-| [kararlar_altyapi.md](kararlar_altyapi.md) | Teknik kararlar | Mimariye dokunurken |
+| `kararlar_urun.md` | Ürün kararları (K1, K2 …) | Ürün/akış kararı alırken |
+| `kararlar_altyapi.md` | Teknik kararlar | Mimariye dokunurken |
 
 Karar biçimi: `## K<NN> — <başlık> (<YYYY-MM-DD>)` · karar · neden · (değiştiyse) `[YERİNE: K<NN>]`. Eski karar silinmez.

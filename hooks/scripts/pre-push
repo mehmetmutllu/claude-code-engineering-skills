@@ -1,0 +1,29 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────
+# GATE: direct push to main is FORBIDDEN
+#
+# Why here: free private repositories may lack server-side branch protection.
+# Until a server-side gate exists this is the only real gate. When one is added,
+# KEEP this file — two gates back each other up (lesson: gates die silently).
+#
+# Known limit: it is local. On a new clone run:
+#   git config core.hooksPath .githooks
+# ─────────────────────────────────────────────────────────────
+
+protected="refs/heads/main"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "$protected" ]; then
+        echo ""
+        echo "  ⛔ REJECTED — direct push to main is not allowed."
+        echo ""
+        echo "  Do this instead: push your own branch, then open a PR."
+        echo "    git switch -c <dev>/<plan-slug>/<short-name>"
+        echo "    git push -u origin HEAD"
+        echo "    gh pr create"
+        echo ""
+        exit 1
+    fi
+done
+
+exit 0

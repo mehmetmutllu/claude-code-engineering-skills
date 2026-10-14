@@ -44,7 +44,7 @@ English summary of the session protocol. The ready-to-use Turkish commands are i
 
 ## Why the cost stays flat
 
-A new session reads ~350 lines (activeContext ≤200 + the PROGRESS line + an index). `archive/` and `memory/` grow with the project, but the start-of-session read does not. Before this rotation existed, one project's `activeContext.md` reached 1,087 lines and was read in full at every start; under these rules the same file is about 100 lines.
+A new session reads ~350 lines (activeContext ≤200 + the PROGRESS line + an index). `archive/` and `memory/` grow with the project, but the start-of-session read does not. Before this rotation existed, one project's `activeContext.md` peaked at 1,586 lines and was read in full at every start; under these rules the same file is about 100 lines. The full history and measurements: [memory-model-evolution](../../playbooks/memory/memory-model-evolution.md); for two or more developers on one repo, use [`devam-ekip`](../../commands/session/devam-ekip.md) / [`bitir-ekip`](../../commands/session/bitir-ekip.md).
 
 ## When the system breaks
 

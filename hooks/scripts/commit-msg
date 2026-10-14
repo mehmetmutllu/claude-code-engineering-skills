@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+# commit-msg — SESSION RECORD / TEST HANDOFF GATE
+#
+# Why: "never save a session before the user has a test recipe" lived only as prose
+# in CLAUDE.md and was forgotten repeatedly. A written rule can be forgotten; a gate cannot.
+#
+# Opens in two cases:
+#   · "Session <N>: …" commit          → full closure check (state budget + newest
+#                                        checklist block must be answered)
+#   · commit that changes product code  → the checklist file must have gained a NEW block
+#   · docs/state/tooling-only commit    → gate stays out of the way
+#
+# Escape hatch: a line STARTING with "[skip-test] <reason>". Line start only — an early
+# version matched anywhere, and the commit message that *described* the escape hatch
+# accidentally used it.
+#
+# Install once per machine (lives in .git/config, does NOT travel with the repo):
+#   git config core.hooksPath tools/git-hooks
+# Make sure the file is committed as 100755:  git update-index --chmod=+x tools/git-hooks/commit-msg
+#
+# Read-only: never modifies files, only stops the commit.
+
+MSG_FILE="$1"
+FIRST_LINE=$(head -n 1 "$MSG_FILE")
+
+# ---- configuration -------------------------------------------------------
+CHECKLIST="docs/dashboard/checklist.md"                  # user-language test recipes
+PRODUCT_RE='^(app|src|panel|css|js|partials)/|^[^/]+\.php$' # what the user SEES
+STATE_SENTINEL="tools/smoke_state_ssot.php"              # state ↔ plan + budgets
+CLOSURE_SENTINEL="tools/smoke_session_closure.php"       # newest block answered?
+PHP="${PHP_BIN:-php}"
+# --------------------------------------------------------------------------
+
+SESSION_RECORD=0
+case "$FIRST_LINE" in
+    Session\ [0-9]*:*) SESSION_RECORD=1 ;;
+esac
+
+PRODUCT_CHANGED=$(git diff --cached --name-only | grep -cE "$PRODUCT_RE" || true)
+
+if [ "$SESSION_RECORD" -eq 0 ] && [ "${PRODUCT_CHANGED:-0}" -eq 0 ]; then
+    exit 0
+fi
+
+if grep -qE '^\[skip-test\]' "$MSG_FILE"; then
+    echo "  ⚠️  [skip-test] seen — gate skipped. The reason must be in the message."
+    exit 0
+fi
+
+ROOT=$(git rev-parse --show-toplevel)
+
+if [ "$SESSION_RECORD" -eq 1 ]; then
+    # State budget + state/plan agreement. Without this call, the budget sentinel
+    # failed but sessions still closed (state file reached 1,586 lines).
+    if [ -f "$ROOT/$STATE_SENTINEL" ]; then
+        if ! "$PHP" "$ROOT/$STATE_SENTINEL" >/dev/null 2>&1; then
+            echo "  ✗ SESSION NOT SAVED — state disagrees with the SSOT plan or a budget is exceeded."
+            echo "    Run: $PHP $STATE_SENTINEL"
+            echo "    Oversized parts are MOVED to archive/, not deleted."
+            exit 1
+        fi
+    fi
+    if [ -f "$ROOT/$CLOSURE_SENTINEL" ]; then
+        "$PHP" "$ROOT/$CLOSURE_SENTINEL" || {
+            echo "  ✗ SESSION NOT SAVED — the user owns the test. Show the checklist,"
+            echo "    wait for the trial, close what comes up in THIS session."
+            exit 1
+        }
+    fi
+    exit 0
+fi
+
+# Product code changed, not a session record → did the checklist gain a NEW block?
+# Compare SETS of headings, not the first heading: block order in the file is not
+# guaranteed, and comparing "newest block" let an older answered block pass the gate.
+NEW_LIST=$(git show ":$CHECKLIST" 2>/dev/null | grep '^## S')
+[ -z "$NEW_LIST" ] && NEW_LIST=$(grep '^## S' "$ROOT/$CHECKLIST" 2>/dev/null)
+OLD_LIST=$(git show "HEAD:$CHECKLIST" 2>/dev/null | grep '^## S')
+
+if [ -n "$OLD_LIST" ]; then
+    ADDED=$(printf '%s\n' "$NEW_LIST" | grep -vxF "$OLD_LIST" || true)
+    if [ -z "$ADDED" ]; then
+        echo ""
+        echo "  ⛔ COMMIT REJECTED — product code changed, no NEW test recipe."
+        echo "     Add a block to $CHECKLIST:"
+        echo "       ## S<N> — DD.MM.YYYY · <title>"
+        echo "       ### Done   (plain language, no jargon)"
+        echo "       ### Check  (step + navigation path + expected result)"
+        echo "     Deliberate exception: a line starting with [skip-test] <reason>"
+        exit 1
+    fi
+fi
+
+exit 0
