@@ -12,13 +12,26 @@ Git hooks and Claude Code hooks taken from real projects and made generic. Each 
 
 ## Install (git hooks)
 
+All three git hooks live in **one** folder, `.githooks/`:
+
 ```bash
-mkdir -p tools/git-hooks
-cp hooks/scripts/pre-commit hooks/scripts/commit-msg tools/git-hooks/
-git config core.hooksPath tools/git-hooks          # per machine; not carried by the repo
-git update-index --chmod=+x tools/git-hooks/*      # commit them as 100755 or they silently won't run
+mkdir -p .githooks
+cp hooks/scripts/pre-commit hooks/scripts/commit-msg hooks/scripts/pre-push .githooks/
+git config core.hooksPath .githooks          # per machine; not carried by the repo - make it step 0 of onboarding
+git update-index --chmod=+x .githooks/*      # commit them as 100755 or they silently won't run
 ```
 
 Then edit the configuration block at the top of each script (product paths, checklist file, sentinel names, tenant tables). Use **one** hook mechanism: `core.hooksPath` disables `.git/hooks`, and with it any `.pre-commit-config.yaml`. Why that matters: [gates-must-be-measured](../playbooks/verification/gates-must-be-measured.md).
 
-The sentinels the hooks call (`tools/smoke_*.php`) are project-specific and not included; each hook skips a sentinel that doesn't exist.
+`pre-commit` needs bash (it reads the staged list NUL-separated, so file names with spaces are safe).
+
+### `commit-msg` fails closed
+
+If the checklist file or a sentinel the hook calls (`tools/smoke_*.php`, project-specific, not included) does not exist, the commit is **rejected**: a gate that silently skips is no gate. Opt out explicitly while a project has no such files yet:
+
+| Variable | Effect |
+|---|---|
+| `ALLOW_NO_CHECKLIST=1` | allow product commits when the checklist file doesn't exist |
+| `ALLOW_NO_SENTINEL=1` | allow session-record commits when the state/closure sentinels don't exist |
+
+Set them per commit (`ALLOW_NO_CHECKLIST=1 git commit ...`) or in your shell profile. `pre-commit` skips its own optional sentinel (`tools/smoke_commit_gates.php`) when it is absent.

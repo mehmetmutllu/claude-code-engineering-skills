@@ -16,14 +16,14 @@
 | `activeContext.md` | **Canlı durum.** Devam noktası + son 3 oturum özeti | Her `/bitir`'de | **200 satır** (sert) |
 | `PROGRESS.md` | Yol haritası + faz sicili | Yalnız faz/roadmap değişince | 150 satır |
 | `memory/*.md` | **Kalıcı bilgi** — kararlar, protokoller, mimari notlar. Bayatlamaz. | Yeni kalıcı karar çıkınca | dosya başı 150 satır |
-| `archive/sessions/YYYY-MM.md` | Eski oturum özetleri | Rotasyonda otomatik | sınırsız |
+| `archive/sessions/<YYYY-MM>.md` | Eski oturum özetleri | Rotasyonda otomatik | sınırsız |
 | `docs/` | Analiz/rapor çıktıları | İş üretince | — |
 
 **Altın kural:** Aynı bilgi iki dosyada yaşamaz. Volatil detay yalnız `activeContext.md`'de; kalıcı karar yalnız `memory/`'de.
 
 ### Token tasarrufu
 
-`/devam` yalnız `activeContext.md` (≤200 satır) + `PROGRESS.md` aktif faz satırını okur. `memory/` dosyaları **indeksten seçilerek** okunur (`memory/README.md`). `archive/` `.claudeignore` sayesinde arama dışıdır.
+`/devam` yalnız `activeContext.md` (≤200 satır) + `PROGRESS.md` aktif faz satırını okur. `memory/` dosyaları **indeksten seçilerek** okunur (`memory/README.md`). `archive/` okuma dışıdır: `.claude/settings.json` içinde `permissions.deny: ["Read(archive/**)"]` (`.claudeignore` Claude Code'un resmî bir özelliği değildir; yalnız not olarak durur).
 
 ### Rotasyon (`/bitir` sırasında otomatik)
 

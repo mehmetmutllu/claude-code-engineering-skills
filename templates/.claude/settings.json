@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(archive/**)",
+      "Read(backups/**)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  }
+}

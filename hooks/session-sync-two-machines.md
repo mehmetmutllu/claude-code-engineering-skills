@@ -58,7 +58,7 @@ case "$MODE" in
     ;;
   push)
     ( mkdir -p "$MEM_REMOTE"; rsync -a -u "$MEM_LOCAL/" "$MEM_REMOTE/"
-      git -C "$SYNC_REPO" add -A memory && git -C "$SYNC_REPO" commit -qm "memory sync" && git -C "$SYNC_REPO" push -q
+      git -C "$SYNC_REPO" add memory/ && git -C "$SYNC_REPO" commit -qm "memory sync" && git -C "$SYNC_REPO" push -q
       [ -n "$(git -C "$PROJ" log @{u}.. --oneline 2>/dev/null)" ] && git -C "$PROJ" push -q
     ) >>"$LOG" 2>&1 & disown ;;
 esac

@@ -25,4 +25,4 @@
 - <kanıt: test sayıları, ekran görüntüleri>
 - <migration varsa: "Migration: 00X_ad.sql ✅ yerelde uygulandı">
 
-*(Eski oturum blokları `archive/sessions/` altında.)*
+*(Eski oturum blokları `archive/sessions/<YYYY-MM>.md` dosyalarında.)*

@@ -16,7 +16,7 @@ English summary of the session protocol. The ready-to-use Turkish commands are i
 | `activeContext.md` | Live state: 🎯 continue-point + last 3 session blocks | Every session end | **200 lines** (hard) |
 | `PROGRESS.md` | Roadmap + completed-phase registry | Only when a phase/roadmap changes | 150 lines |
 | `memory/*.md` | Durable knowledge: decisions, protocols, architecture notes | When a durable decision appears | 150 lines per file |
-| `archive/sessions/YYYY-MM.md` | Old session blocks | Automatically, during rotation | unlimited (excluded via `.claudeignore`) |
+| `archive/sessions/<YYYY-MM>.md` | Old session blocks | Automatically, during rotation | unlimited (kept out of reads by a `Read(archive/**)` deny rule) |
 | `plans/<topic>.md` (optional) | Single source of truth for one work stream, with an append-only status log | When that stream advances | — |
 
 **Golden rule — one owner per fact.** Volatile detail ("we are at X, next is Y") lives only in `activeContext.md`; durable decisions live only in `memory/`. Every second copy is a future stale copy.

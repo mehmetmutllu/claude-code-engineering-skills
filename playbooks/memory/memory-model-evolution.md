@@ -42,7 +42,7 @@ Same pattern in the SaaS project: state file at 1,586 lines, a 474-line continue
    - `PROGRESS.md` - thin frame + phase registry; written only when the roadmap changes, **not every session**.
    - a fixed reference file (workspace, ports, logins) - rarely.
    - SSOT plans - own "what's next" (see [derived-state-not-copied](derived-state-not-copied.md)).
-2. **Rolling-3:** the 4th block moves to `archive/sessions/<YYYY-MM>/`; `archive/` is in `.claudeignore`.
+2. **Rolling-3:** the 4th block moves to `archive/sessions/<YYYY-MM>.md`; `archive/` is kept out of the agent's reads (a `Read(archive/**)` deny rule; see [templates/.claude/settings.json](../../templates/.claude/settings.json)).
 3. **Hard budgets enforced by the session-record hook:** whole file ≤ 400 lines · continue-point ≤ 60 · session block ≤ 40 · archive traces **one line per month** (an `archive/sessions/INDEX.md` table of month -> session range replaced 151 trace lines). Hook: [commit-msg-session-gate](../../hooks/commit-msg-session-gate.md).
 4. **Turn card (game project):** `activeContext.md` became a card **overwritten** each session (≤ 80 lines: question · arms to measure · numbers · decision · implementation · guard). `git log -p activeContext.md` *is* the history - the 96 blocks had been a bad imitation of it. Start-of-session read set capped at **≤ 15 KB** (measured). See [variant-gate-measure-before-change](../verification/variant-gate-measure-before-change.md).
 5. **Each fact in one place:** numbers -> `docs/<topic>-report-<phase>.md`; decision ≤ 12 lines -> decision log; status -> 1-2 lines in progress; "now" -> the card; narrative -> nowhere a second time; history -> git + archive.

@@ -49,9 +49,14 @@ function readZip(buf) {
   };
 }
 
+const USAGE = `usage: node verify_bundle.js <bundle> [--require <inner path>=<regex>]... [--same <inner path>=<repo path>=<regex with 1 group>]...
+  --require  inner file must match regex
+  --same     captured group must be equal in the bundle file and the repo file
+exit: 0 all checks passed · 1 a check failed (do not ship) · 2 usage error`;
 const args = process.argv.slice(2);
+if (args.includes('--help') || args.includes('-h')) { console.log(USAGE); process.exit(0); }
 const bundle = args.shift();
-if (!bundle) { console.error('usage: node verify_bundle.js <bundle> --require path=regex --same inner=repo=regex'); process.exit(2); }
+if (!bundle || args.length === 0) { console.error(USAGE); process.exit(2); }
 const get = readZip(fs.readFileSync(bundle));
 let failed = 0;
 const fail = msg => { failed++; console.error('  FAIL ' + msg); };

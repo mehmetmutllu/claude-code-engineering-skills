@@ -11,7 +11,7 @@
 1. **Collapse to one canonical source first.** E.g. the JS constant is fed from the backend (`window.X = <?= json_encode(...) ?>`), the grid engine moves to a shared `program-grid.js` both pages load, the shared table header becomes an included partial.
 2. **If that's impossible, register the pair** in `context/twin-registry.md`. Whenever you touch one side, check the other.
 
-The file is deliberately **not** in `.claudeignore`, so search finds it. References in it are verified at write time (Grep/Read), never copied.
+The file is deliberately **not** excluded from the agent's reads, so search finds it. References in it are verified at write time (Grep/Read), never copied.
 
 ## Entry format
 

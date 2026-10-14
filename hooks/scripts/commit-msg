@@ -16,8 +16,13 @@
 # accidentally used it.
 #
 # Install once per machine (lives in .git/config, does NOT travel with the repo):
-#   git config core.hooksPath tools/git-hooks
-# Make sure the file is committed as 100755:  git update-index --chmod=+x tools/git-hooks/commit-msg
+#   git config core.hooksPath .githooks
+# Make sure the file is committed as 100755:  git update-index --chmod=+x .githooks/commit-msg
+#
+# Fails CLOSED: a missing checklist file or a missing sentinel rejects the commit, because a
+# gate that silently skips is no gate. Explicit opt-outs (per commit or per machine):
+#   ALLOW_NO_CHECKLIST=1   project has no checklist file (yet)
+#   ALLOW_NO_SENTINEL=1    project has no state/closure sentinels (yet)
 #
 # Read-only: never modifies files, only stops the commit.
 
@@ -50,24 +55,29 @@ fi
 
 ROOT=$(git rev-parse --show-toplevel)
 
+# Missing pieces fail closed unless explicitly opted out.
+if [ ! -f "$ROOT/$CHECKLIST" ] && [ "${ALLOW_NO_CHECKLIST:-0}" != "1" ]; then
+    echo "  ⛔ COMMIT REJECTED — checklist file $CHECKLIST not found; the gate cannot measure."
+    echo "     Create it, fix CHECKLIST in this hook, or opt out explicitly: ALLOW_NO_CHECKLIST=1"
+    exit 1
+fi
+
+run_sentinel() {  # $1 = sentinel path, rest = message on failure
+    S="$1"; shift
+    if [ ! -f "$ROOT/$S" ]; then
+        [ "${ALLOW_NO_SENTINEL:-0}" = "1" ] && return 0
+        echo "  ⛔ SESSION NOT SAVED — sentinel $S not found; the gate cannot measure."
+        echo "     Add it, fix the path in this hook, or opt out explicitly: ALLOW_NO_SENTINEL=1"
+        exit 1
+    fi
+    "$PHP" "$ROOT/$S" >/dev/null 2>&1 || { for line in "$@"; do echo "$line"; done; echo "    Run: $PHP $S"; exit 1; }
+}
+
 if [ "$SESSION_RECORD" -eq 1 ]; then
     # State budget + state/plan agreement. Without this call, the budget sentinel
     # failed but sessions still closed (state file reached 1,586 lines).
-    if [ -f "$ROOT/$STATE_SENTINEL" ]; then
-        if ! "$PHP" "$ROOT/$STATE_SENTINEL" >/dev/null 2>&1; then
-            echo "  ✗ SESSION NOT SAVED — state disagrees with the SSOT plan or a budget is exceeded."
-            echo "    Run: $PHP $STATE_SENTINEL"
-            echo "    Oversized parts are MOVED to archive/, not deleted."
-            exit 1
-        fi
-    fi
-    if [ -f "$ROOT/$CLOSURE_SENTINEL" ]; then
-        "$PHP" "$ROOT/$CLOSURE_SENTINEL" || {
-            echo "  ✗ SESSION NOT SAVED — the user owns the test. Show the checklist,"
-            echo "    wait for the trial, close what comes up in THIS session."
-            exit 1
-        }
-    fi
+    run_sentinel "$STATE_SENTINEL"         "  ✗ SESSION NOT SAVED — state disagrees with the SSOT plan or a budget is exceeded."         "    Oversized parts are MOVED to archive/, not deleted."
+    run_sentinel "$CLOSURE_SENTINEL"         "  ✗ SESSION NOT SAVED — the user owns the test. Show the checklist,"         "    wait for the trial, close what comes up in THIS session."
     exit 0
 fi
 

@@ -9,8 +9,8 @@ description: Çok geliştiricili depoda oturumu kaydet — yalnız kendi state d
 0. **Ön koşul — iş bitişi yapıldı mı?** Kendi ölçümün bitti, test verisi başlangıç hâline döndü, test tarifi kullanıcıya verildi ve kullanıcı notları ya çözüldü ya plana yazıldı. Yapılmadıysa önce onu yap; oturum kaydı test devrini **beklemez**, test devri oturum kaydını bekler.
 
 1. `state/<kod>/activeContext.md`: DEVAM NOKTASI'nı **sıradaki oturuma göre** yaz + yeni `## 🔄 OTURUM <mühür>` bloğu ekle (mühür: `M12`, `H5`, ortak iş `M12+H5`).
-   - **Rolling-3:** 4. blok `archive/sessions/<YYYY-MM>/`'ye taşınır.
-   - **Arşiv izi ayda TEK satır:** `> 📦 Arşiv — 2026-09: M10-M24 → archive/sessions/2026-09/` — yeni satır ekleme, o ayın aralığını genişlet.
+   - **Rolling-3:** 4. blok `archive/sessions/<YYYY-MM>.md` sonuna taşınır.
+   - **Arşiv izi ayda TEK satır:** `> 📦 Arşiv — 2026-09: M10-M24 → archive/sessions/2026-09.md` — yeni satır ekleme, o ayın aralığını genişlet.
    - "Son güncelleme" satırı max 500 karakter; zincirleme "Önceki:..." yasak.
    - ⚠️ SSOT plan bu oturumda revize edildiyse DEVAM NOKTASI planın **nihai hâlinden sonra** yazılır.
    - ⚠️ Bir faz kapandıysa o fazın DEVAM NOKTASI alt-blokları da `archive/eski-fazlar/`'a iner.

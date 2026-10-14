@@ -2,7 +2,7 @@
 
 **The process I use to build software with [Claude Code](https://claude.com/claude-code): session memory that doesn't bloat, sprints with parallel sub-agents, gates that are measured before they're trusted, and evidence before "done".**
 
-I build and maintain about ten projects with Claude Code as my day-to-day development tool: a multi-tenant SaaS (500+ numbered sessions), a two-developer SaaS, a mobile language-learning app going through Google Play and App Store release, an e-commerce site, a 3D mobile game, a game with an LLM game master, a nonprofit site with an accounting module, and a YouTube documentary pipeline. Architecture, data, security and product decisions stay with me; the agent writes, measures and reports. Everything here was extracted from those projects and made generic: playbooks (the practice and the incident behind it), slash commands, skills, hooks and small tools. Playbooks and this README are in English; most commands and some skills are in **Turkish**, the language I work in.
+I build and maintain more than ten projects with Claude Code as my day-to-day development tool: a multi-tenant SaaS (500+ numbered sessions), a two-developer SaaS, a mobile language-learning app going through Google Play and App Store release, an e-commerce site, a 3D mobile game, a game with an LLM game master, a nonprofit site with an accounting module, and a YouTube documentary pipeline. Architecture, data, security and product decisions stay with me; the agent writes, measures and reports. Everything here was extracted from those projects and made generic: playbooks (the practice and the incident behind it), slash commands, skills, hooks and small tools. Playbooks, this README, the tools and the `examples/` state files are in English. Most commands, several skills and everything in `templates/` are in **Turkish**, the language I work in.
 
 ## Start here
 
@@ -13,26 +13,13 @@ I build and maintain about ten projects with Claude Code as my day-to-day develo
 ## How the system fits together
 
 ```
-            CLAUDE.md (short reference + hard rules)       memory/ (durable decisions, read via index)
-                         │                                              ▲
- /devam ──► git sync ──► read activeContext + PROGRESS line ──► cross-check ──► ≤10-line report ──► approval
-                                                                                                     │
-          ┌──────────────────────────────────────────────────────────────────────────────────────────┘
-          ▼
-   plan file (approved once) ──► sprint: orchestrator + parallel agents (own files / worktrees)
-          │                              │
-          │                              ▼
-          │                 merge ─► tests one by one ─► mutation check ─► real browser clicks
-          │                              │
-          ▼                              ▼
-   decision register            gates: pre-commit · commit-msg · pre-push · CI (each one broken once on purpose)
-                                         │
-                                         ▼
-                 work end: test recipe in user language ─► user trial ─► "done" derived from the user only
-                                         │
-                                         ▼
- /bitir ──► continue-point ─► session block ─► ROTATE (3 blocks, ≤200 lines) ─► verify new references
-            ─► secret scan ─► files added by name ─► "Session N: title" ─► push ─► change log
+/devam ─► plan (approved once) ─► sprint: orchestrator + parallel agents ─► merge · tests · mutation check
+  ▲                                                                                        │
+  │                                                                                        ▼
+/bitir ◄─ "done" from the user only ◄─ test recipe + user trial ◄─ gates: pre-commit · commit-msg · pre-push · CI
+
+state files: CLAUDE.md · activeContext.md (≤200 lines, last 3 sessions) · PROGRESS.md
+             memory/ (durable decisions, read via index) · archive/sessions/<YYYY-MM>.md (never read at start)
 ```
 
 ## Contents
@@ -53,7 +40,7 @@ I build and maintain about ten projects with Claude Code as my day-to-day develo
 | | [twin-registry](playbooks/memory/twin-registry.md) | Logic that lives in two places, tracked until it lives in one |
 | | [multi-developer-session-state](playbooks/memory/multi-developer-session-state.md) | `state/<dev>/`, hostname identity, seals, hard budgets |
 | | [two-machine-sync](playbooks/memory/two-machine-sync.md) | Laptop + desktop: what travels via git, what never does |
-| Verification | [gates-must-be-measured](playbooks/verification/gates-must-be-measured.md) | Break every gate once; canaries; "could not measure" ≠ green |
+| Verification | [gates-must-be-measured](playbooks/verification/gates-must-be-measured.md) | Break every gate on purpose; canaries; "could not measure" ≠ green |
 | | [evidence-rule-agent-cannot-mark-tested](playbooks/verification/evidence-rule-agent-cannot-mark-tested.md) | ready / agent-verified / done, and only the user makes "done" |
 | | [user-acceptance-handoff](playbooks/verification/user-acceptance-handoff.md) | Work end ≠ session end; hand-executed test recipes in user language |
 | | [verify-tool-findings](playbooks/verification/verify-tool-findings.md) | Reproduce a finding and its rationale before fixing it |
@@ -91,12 +78,17 @@ I build and maintain about ten projects with Claude Code as my day-to-day develo
 | [blind-second-review](skills/blind-second-review/SKILL.md) | Clean-context second review of content batches with a seeded sample and a threshold (English) |
 | [browser-verified-review](skills/browser-verified-review/SKILL.md) | UI work is done only when verified in a browser (English) |
 | [microcopy-tr](skills/microcopy-tr/SKILL.md) | Turkish UX writing rules and audit mode |
-| [tiktok-karusel](skills/tiktok-karusel/SKILL.md) | TikTok photo-carousel rules for a language app |
-| [cold-records-uretim](skills/cold-records-uretim/SKILL.md) | Gated production flow for a history documentary channel |
-| [yt-audit](skills/yt-audit/SKILL.md) | 14-day channel audit: ≤3 findings, one change per finding |
-| [yt-planner](skills/yt-planner/SKILL.md) | Publishing calendar + weighted topic scoring |
 
-The three video skills reference tools inside their own project; they are here as examples of gated, checklist-driven skills, not as drop-in tools.
+### Domain examples
+
+Skills written for one specific project, kept as examples of how I write gated, checklist-driven skills. They reference tools inside their own project and are not drop-in tools.
+
+| Skill | What it does |
+|---|---|
+| [tiktok-karusel](examples/skills/tiktok-karusel/SKILL.md) | TikTok photo-carousel rules for a language app |
+| [cold-records-uretim](examples/skills/cold-records-uretim/SKILL.md) | Gated production flow for a history documentary channel |
+| [yt-audit](examples/skills/yt-audit/SKILL.md) | 14-day channel audit: ≤3 findings, one change per finding |
+| [yt-planner](examples/skills/yt-planner/SKILL.md) | Publishing calendar + weighted topic scoring |
 
 ### Hooks, tools, templates
 
@@ -104,15 +96,15 @@ The three video skills reference tools inside their own project; they are here a
 |---|---|
 | [`hooks/`](hooks/README.md) | `pre-commit`, `commit-msg`, `pre-push` git hooks and two Claude Code hooks, each with the incident behind it |
 | [`tools/`](tools/README.md) | `blind_sample.py` (seeded review sample + disagreement rate), `verify_bundle.js` (look inside an AAB/APK/IPA before shipping) |
-| [`templates/`](templates/) | Blank `CLAUDE.md`, `activeContext.md`, `PROGRESS.md`, `memory/README.md`, `.claudeignore` |
-| [`examples/`](examples/) | Filled-in state files for a fictional project |
+| [`templates/`](templates/) | Blank `CLAUDE.md`, `activeContext.md`, `PROGRESS.md`, `memory/README.md` (Turkish) and [`.claude/settings.json`](templates/.claude/settings.json), which keeps `archive/` out of reads with `permissions.deny: ["Read(archive/**)"]`. The `.claudeignore` there is only a note: it is not an official Claude Code feature |
+| [`examples/`](examples/) | Filled-in state files for a fictional project (English), plus the domain-example skills above |
 
 ## How I run a piece of work
 
 1. **Plan first.** A written plan, approved once before any code.
 2. **Design approval on live previews.** Visual choices are rendered side by side in a real browser, not described; rejected variants are kept.
 3. **Sprint.** Each independent task goes to a sub-agent with a full brief and its own files; I keep the main context, the shared files and the browser.
-4. **Merge, test, break.** Test suites run one after another; every new guard is broken on purpose at least twice to prove it can fail.
+4. **Merge, test, break.** Test suites run one after another; every new gate or guard is broken on purpose before it is trusted.
 5. **Hand off with evidence.** A test recipe in the user's language, then the user's trial. The agent may write "ready" or "agent-verified", never "tested".
 6. **Change log.** Every user-visible change is listed item by item, so nothing ships silently.
 
@@ -120,15 +112,14 @@ Hard rules underneath: references are verified with grep/read before they are wr
 
 ## Results these practices produced
 
-All numbers come from the projects' own reports and logs.
+All numbers come from the projects' own records; each item names the kind of source.
 
-- **Model choice by measurement:** the 495-turn baseline for a game-master model (55 scenarios × 3 models × 3 repeats) cost **$1.09** in model calls and was scored by blind LLM judges. The cheapest model became the default; fixing the weaknesses all three models shared then cut cost by **15%** and p90 latency by **42%** with quality unchanged (4.41 → 4.39). [llm-evaluation-harness](playbooks/llm/llm-evaluation-harness.md)
-- **Content quality without a human proofreader:** a clean-context second review sent **5 of 15** topic batches back on the first pass; after rework every batch was at **≤ 4%** disagreement, and words with audited distractors went from 457 to **616 of 728**. [blind-review-content-pipeline](playbooks/llm/blind-review-content-pipeline.md)
-- **Session memory that stays small:** one project's state file peaked at **1,586 lines** and was read in full at every start; after rotation it is about **100 lines** with 500+ numbered sessions. In another, a 4,219-line file whose real "now" was 106 lines became an overwritten card with a ≤ 15 KB start-of-session read. [memory-model-evolution](playbooks/memory/memory-model-evolution.md)
-- **Gates that were silently off:** a pre-commit configuration had not run for **~4 months**, a PHPStan job was green after analysing **0 files**, and a tenant-isolation test exited 0 whether or not data leaked. Each was found and replaced with a gate that has to prove it ran. [gates-must-be-measured](playbooks/verification/gates-must-be-measured.md)
-- **Mutation checks find real bugs:** in one round **3 of 9** mutations escaped the guards, and all three pointed at real defects in the code. [variant-gate-measure-before-change](playbooks/verification/variant-gate-measure-before-change.md)
-- **Unattended work with boundaries:** the first "night mode" run completed a 7/7 approved list with 5 commits, unit tests 85/85 and browser smoke 27/27. [autonomous-night-mode](playbooks/orchestration/autonomous-night-mode.md)
-- **Live vs repo drift made visible:** a hash comparison of 196 deployed files showed 88 identical, 31 different and 77 missing on the live site, before an upload that would have removed a working feature. [deploy-verification-against-live](playbooks/ci-and-release/deploy-verification-against-live.md)
+- **Model choice by measurement:** the 495-turn baseline for a game-master model (55 scenarios × 3 models × 3 repeats) cost **$1.09** in model calls and was scored by blind LLM judges. The cheapest model became the default; fixing the weaknesses all three models shared then cut cost by **15%** and p90 latency by **42%** with quality unchanged (4.41 → 4.39). *Source: measurement reports.* [llm-evaluation-harness](playbooks/llm/llm-evaluation-harness.md)
+- **Content quality without a human proofreader:** a clean-context second review sent **5 of 15** topic batches back on the first pass; after rework every batch was at **≤ 4%** disagreement, and words with audited distractors went from 457 to **616 of 728**. *Source: measurement report + content change ledger.* [blind-review-content-pipeline](playbooks/llm/blind-review-content-pipeline.md)
+- **Session memory that stays small:** one project's state file peaked at **1,586 lines** and was read in full at every start; after rotation it is about **100 lines** with 500+ numbered sessions. In another, a 4,219-line file whose real "now" was 106 lines became an overwritten card with a ≤ 15 KB start-of-session read. *Source: session logs and sentinel comments; current size counted in the repo.* [memory-model-evolution](playbooks/memory/memory-model-evolution.md)
+- **Gates that were silently off:** a pre-commit configuration had not run for **~4 months**, a PHPStan job was green after analysing **0 files**, and a tenant-isolation test exited 0 whether or not data leaked. Each was found and replaced with a gate that has to prove it ran. *Source: session logs (incident lessons) and commits that replaced the gates.* [gates-must-be-measured](playbooks/verification/gates-must-be-measured.md)
+- **Mutation checks find real bugs:** in one round **3 of 9** mutations escaped the guards, and all three pointed at real defects in the code. *Source: session log.* [variant-gate-measure-before-change](playbooks/verification/variant-gate-measure-before-change.md)
+- **Live vs repo drift made visible:** a hash comparison of 196 deployed files showed 88 identical, 31 different and 77 missing on the live site, before an upload that would have removed a working feature. *Source: session log.* [deploy-verification-against-live](playbooks/ci-and-release/deploy-verification-against-live.md)
 
 ## Installation
 
@@ -143,8 +134,9 @@ mkdir -p .claude/skills
 cp -r skills/project-continuity skills/sprint-orchestration .claude/skills/
 
 # state files
-cp templates/CLAUDE.md templates/activeContext.md templates/PROGRESS.md templates/.claudeignore .
+cp templates/CLAUDE.md templates/activeContext.md templates/PROGRESS.md .
 mkdir -p memory archive/sessions && cp templates/memory/README.md memory/
+mkdir -p .claude && cp templates/.claude/settings.json .claude/   # merge by hand if you already have one
 
 # git hooks (optional): see hooks/README.md
 ```

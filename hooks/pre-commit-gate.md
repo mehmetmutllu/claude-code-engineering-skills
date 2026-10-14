@@ -16,7 +16,7 @@ Script: [`scripts/pre-commit`](scripts/pre-commit)
 ## Install
 
 ```bash
-git config core.hooksPath tools/git-hooks       # per machine, not carried by the repo
-git update-index --chmod=+x tools/git-hooks/pre-commit tools/git-hooks/commit-msg
+git config core.hooksPath .githooks       # per machine, not carried by the repo
+git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg .githooks/pre-push
 ```
 Put the install line in `CLAUDE.md` and in the onboarding doc as step 0, and in the state file as a reminder for the second machine.

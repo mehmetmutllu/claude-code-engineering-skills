@@ -21,8 +21,9 @@ Script: [`scripts/commit-msg`](scripts/commit-msg)
 - **The budget sentinel must be called from here.** It existed, it failed, sessions still closed, because nothing called it.
 - **One hook mechanism.** `core.hooksPath` disables `.git/hooks` (and thus the pre-commit framework). Don't run both.
 - **Executable bit in the index** (`100755`), or the hook silently doesn't run on a fresh clone.
-- **Per-machine install:** `git config core.hooksPath tools/git-hooks`. Worktree creation can rewrite it to an absolute path — reset after merges.
+- **Per-machine install:** `git config core.hooksPath .githooks`. Worktree creation can rewrite it to an absolute path — reset after merges.
 - Never bypass with `--no-verify`; fix the cause.
+- **Fails closed.** A missing checklist file or sentinel rejects the commit; explicit opt-outs are `ALLOW_NO_CHECKLIST=1` and `ALLOW_NO_SENTINEL=1` (see [hooks/README](README.md)).
 
 ## Companion sentinels you need
 

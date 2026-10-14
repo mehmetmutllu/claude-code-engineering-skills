@@ -4,7 +4,7 @@
 >
 > **Practice:** Start only from an approved list (or a cold-start decision matrix), never cross a fixed set of boundaries, test and commit per milestone, and leave a morning report whose open decisions carry a recommendation but are never applied.
 >
-> **Evidence:** Used in an e-commerce site and a 3D mobile game. The first night in the game project completed a 7/7 approved list: 5 commits pushed, unit tests 85/85, browser smoke 27/27, console errors 0, a morning report and a fresh build waiting.
+> **Evidence:** Used in an e-commerce site and a 3D mobile game. The first night in the game project completed a 7/7 approved list: 5 commits, unit tests 85/85, browser smoke 27/27, console errors 0, a morning report and a fresh build waiting.
 
 The command that runs this mode is [`commands/quality/autopilot.md`](../../commands/quality/autopilot.md) (cold start, decision matrix, per-step rhythm, short start-of-run brief). This playbook adds what the two projects shared beyond the command: the boundary table, the morning report and the stop rule.
 

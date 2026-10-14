@@ -1,4 +1,7 @@
-# Arama/indeksleme dışı — token tasarrufu
+# NOTE: .claudeignore is NOT an official Claude Code feature; Claude Code does not read this file.
+# To keep the archive out of the agent's reads, use templates/.claude/settings.json:
+#   "permissions": { "deny": ["Read(archive/**)"] }
+# This list only documents which folders are meant to stay out of reads.
 archive/
 backups/
 node_modules/

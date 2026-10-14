@@ -72,7 +72,7 @@ The source project's state file had grown to **1,586 lines, 74% of which were no
 | archive traces | **one line per month** | widen the month's range, never add a line |
 
 ```
-> 📦 Archive — 2026-08: M1-M9 → archive/sessions/2026-08/
+> 📦 Archive — 2026-08: M1-M9 → archive/sessions/2026-08.md
 ```
 Enforced by the session-record commit hook (state sentinel). When a phase closes, its "carried-over items" leave the continue-point too.
 

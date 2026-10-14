@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # pre-commit — COMMIT-TIME GATE (single mechanism)
 #
@@ -13,29 +13,31 @@
 # for ~4 months, because `core.hooksPath` makes Git ignore .git/hooks — where the
 # pre-commit framework installs. Do not install a second mechanism.
 #
-# Install once per machine:  git config core.hooksPath tools/git-hooks
+# Install once per machine:  git config core.hooksPath .githooks
 # Read-only. Never bypass with --no-verify: fix the cause.
 
 FAIL=0
 fail() { printf '✗ %s\n' "$1"; FAIL=1; }
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACM)
-[ -z "$STAGED" ] && exit 0
+# NUL-separated list: file names with spaces or newlines are handled safely.
+LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
+git diff --cached --name-only --diff-filter=ACM -z > "$LIST"
+[ -s "$LIST" ] || exit 0
 
 PHP="${PHP_BIN:-php}"
 TENANT_COL="${TENANT_COL:-tenant_id}"
 TENANT_TABLES="${TENANT_TABLES:-customer|order|invoice|appointment}"   # adjust
 
 # 1. PHP syntax
-for f in $STAGED; do
+while IFS= read -r -d '' f; do
     case "$f" in *.php) ;; *) continue ;; esac
     [ -f "$f" ] || continue
     OUT=$("$PHP" -l "$f" 2>&1) || fail "PHP syntax: $f
      $(printf '%s' "$OUT" | head -3)"
-done
+done < "$LIST"
 
 # 2. Secret leaks — names
-for f in $STAGED; do
+while IFS= read -r -d '' f; do
     BASE=$(basename "$f")
     if [ "$BASE" = ".env.example" ]; then
         # The template is allowed, but only with __PLACEHOLDER__ values for secret-named keys.
@@ -51,23 +53,23 @@ for f in $STAGED; do
         *secret*|*password*|*credential*)
             fail "File name suggests a secret: $f — verify or rename" ;;
     esac
-done
+done < "$LIST"
 
 # 2b. Secret leaks — content (deliberately narrow: a noisy gate gets disabled)
-for f in $STAGED; do
+while IFS= read -r -d '' f; do
     [ -f "$f" ] || continue
     case "$f" in *.png|*.jpg|*.jpeg|*.gif|*.pdf|*.zip|*.xlsx|*.ico|*.woff|*.woff2|*.ttf) continue ;; esac
     CONTENT=$(git show ":$f" 2>/dev/null) || continue
     HIT=$(printf '%s' "$CONTENT" | grep -nE \
       '(AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{32,}|ghp_[A-Za-z0-9]{36}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' | head -2)
     [ -n "$HIT" ] && fail "Credential pattern in $f: $HIT"
-done
+done < "$LIST"
 if command -v gitleaks >/dev/null 2>&1; then
     gitleaks protect --staged --no-banner >/dev/null 2>&1 || fail "gitleaks found a secret (gitleaks protect --staged -v)"
 fi
 
 # 3. Tenant filter (full scan lives in tools/tenant-leak-scan.php, run in CI)
-for f in $STAGED; do
+while IFS= read -r -d '' f; do
     case "$f" in *.php) ;; *) continue ;; esac
     case "$f" in tools/*|tests/*|scripts/*|archive/*) continue ;; esac
     [ -f "$f" ] || continue
@@ -75,14 +77,14 @@ for f in $STAGED; do
        && grep -E "FROM[[:space:]]+\b($TENANT_TABLES)\b" "$f" >/dev/null 2>&1; then
         fail "Tenant filter missing: $f — use WHERE id = ? AND $TENANT_COL = ?"
     fi
-done
+done < "$LIST"
 
 # 4. Large files
-for f in $STAGED; do
+while IFS= read -r -d '' f; do
     [ -f "$f" ] || continue
     SIZE=$(wc -c < "$f" | tr -d ' ')
     [ "${SIZE:-0}" -gt 1048576 ] && fail "File over 1 MB: $f ($((SIZE / 1024)) KB)"
-done
+done < "$LIST"
 
 # 5. Are the gates themselves alive? (files present, 100755, single mechanism, hooksPath)
 if [ -f tools/smoke_commit_gates.php ]; then
