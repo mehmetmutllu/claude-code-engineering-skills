@@ -1,4 +1,9 @@
-# Skill: design-review
+---
+name: browser-verified-review
+description: Browser-verified UI review workflow — measure the live DOM before changing CSS, screenshot every claim per viewport, check interactive states, run structured review passes with a score bar, and close all findings in the same session. Use after any UI change, before marking UI work done, or when asked for a design/UI review of a running page.
+---
+
+# Skill: browser-verified-review
 
 Browser-verified UI review workflow. The rule it enforces: **never mark UI work ✅ from reading code — verify it in a real browser.**
 

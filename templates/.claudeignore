@@ -1,0 +1,5 @@
+# Arama/indeksleme dışı — token tasarrufu
+archive/
+backups/
+node_modules/
+vendor/

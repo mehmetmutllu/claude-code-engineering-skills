@@ -26,4 +26,4 @@
 - Create flow + validation (server + JS mirror, registered as twin T-2).
 - Evidence: smoke 15/0.
 
-*(Older session blocks live in `archive/sessions/2026-08/`.)*
+*(Older session blocks live in `archive/sessions/2026-08.md`.)*
